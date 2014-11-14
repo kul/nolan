@@ -2,6 +2,10 @@
 
 For scheduling task according to limited `Repeating Time Interval` Syntax of [ISO 8601][iso].
 
+#Install
+
+[![Clojars Project](http://clojars.org/nolan/latest-version.svg)](http://clojars.org/nolan)
+
 ## Usage
 
 nolan is a customizable scheduler which can schedule according to ISO_8601
