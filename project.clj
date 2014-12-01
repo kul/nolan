@@ -1,4 +1,4 @@
-(defproject nolan "0.2.0-SNAPSHOT"
+(defproject nolan "0.1.1"
   :description "ISO8601 Scheduler for Clojure"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}

@@ -17,7 +17,7 @@
   "Repeating Time Interval regex."
   #"^R(\d*)/(.*)?/(P.*)?$")
 
-(defn- parse-schedule [s]
+(defn parse-schedule [s]
   "Parse a limited subset of ISO8601 repeating time interval to be used for
   scheduling jobs."
   (let [match (re-find ri-regex s)
@@ -89,10 +89,17 @@
 
 ;; Testing {{{1
 (comment
-  (parse-schedule "R5/2008-03-01T13:00:00Z/P1Y2M10DT2H30M")
+  (def rti "R1/2014-11-28T12:18:00/")
+  (java.util.Date. (System/currentTimeMillis))
+  (java.util.Date. (.getMillis (DateTime.)))
+  (java.util.Date.)
+  (DateTime. (at/now))
+  (= (System/currentTimeMillis) (.getMillis (DateTime.)))
+  (/ (- (.getMillis (second (parse-schedule rti))) (at/now)) 1000.0)
   (parse-schedule "R5//PT10S")
   (def sc (get-mem-scheduler))
-  (def scid (add-schedule sc "R//PT1S" #(log/info "OK")))
+  (def scid (add-schedule sc rti #(log/info "OK")))
+  (def scid1 (add-schedule sc "R//PT1S" #(log/info "OK")))
   (expire sc scid)
 
   (def sc (get-mem-scheduler {1 {:id 1 :iso-str "R//PT1S" :entity #(log/info "KO")}}))
