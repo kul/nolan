@@ -1,6 +1,6 @@
 # nolan
 
-[![Travis Badge](https://img.shields.io/travis/kul/nolan.svg?style=flat)](https://travis-ci.org/kul/nolan "Travis Badge")
+[![Travis Badge](https://img.shields.io/travis/kul/nolan.svg?style=flat)](https://travis-ci.org/kul/nolan "Travis Badge for nolan")
 
 For scheduling task according to limited `Repeating Time Interval` Syntax of [ISO 8601][iso].
 
