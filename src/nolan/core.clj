@@ -17,6 +17,8 @@
   "Repeating Time Interval regex."
   #"^R(\d*)/(.*)?/(P.*)?$")
 
+(def ^:dynamic *pool-delta* 40)
+
 (defn parse-schedule [s]
   "Parse a limited subset of ISO8601 repeating time interval to be used for
   scheduling jobs."
@@ -42,18 +44,35 @@
                  #(recuring-schedule scheduler counter period entity id) spool))
         (.execute scheduler entity)
         (when (= period :tail)
-          (at/at (+ 10 (at/now))
+          (at/at (+ *pool-delta* (at/now))
                  #(recuring-schedule scheduler counter period entity id) spool)))
       ; Scheduling completed
       (.expire scheduler id))
     ; Logging is must as it is not possible to throw exceptions back to user api
     (catch Exception e (log/error e))))
 
+(defn next-time
+  "Gives the next execution time for a schedules's `start` time and `period`."
+  [start-date period]
+  (let [start (.getMillis start-date)
+        now (at/now)]
+    (cond
+      (> start now) start
+      (= period :tail) (+ *pool-delta* (at/now))
+      :default
+      (let [period (.getMillis (.toDurationFrom period start-date))
+            times (quot (- now start) period)
+            nxt (+ start (* period times))]
+        (if (< (Math/abs (- nxt now)) *pool-delta*)
+          (+ *pool-delta* (at/now)) (+ nxt period))))))
+
 (defn- start-scheduling
   [scheduler iso-str entity id]
   (let [[rept start period] (parse-schedule iso-str)
         counter (atom rept)]
-    (at/at (if (= start :now) (+ 10 (at/now)) (.getMillis start))
+    (at/at (if (= start :now)
+             (+ *pool-delta* (at/now))
+             (next-time start period))
            #(recuring-schedule scheduler counter period entity id) spool)))
 
 ;; User API {{{1
@@ -89,14 +108,10 @@
 
 ;; Testing {{{1
 (comment
-  (def rti "R1/2014-11-28T12:18:00/")
-  (java.util.Date. (System/currentTimeMillis))
-  (java.util.Date. (.getMillis (DateTime.)))
-  (java.util.Date.)
-  (DateTime. (at/now))
-  (= (System/currentTimeMillis) (.getMillis (DateTime.)))
+  (def rti "R1/2015-01-20T13:59:00/")
   (/ (- (.getMillis (second (parse-schedule rti))) (at/now)) 1000.0)
   (parse-schedule "R5//PT10S")
+
   (def sc (get-mem-scheduler))
   (def scid (add-schedule sc rti #(log/info "OK")))
   (def scid1 (add-schedule sc "R//PT1S" #(log/info "OK")))
@@ -104,4 +119,5 @@
 
   (def sc (get-mem-scheduler {1 {:id 1 :iso-str "R//PT1S" :entity #(log/info "KO")}}))
   (boot sc)
-  (expire sc 1))
+  (expire sc 1)
+  )
