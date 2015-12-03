@@ -42,7 +42,7 @@
         (when (not= period :tail)
           (at/at (.getMillis (.plus (DateTime.) period))
                  #(recuring-schedule scheduler counter period entity id) spool))
-        (.execute scheduler entity)
+        (.execute scheduler id entity)
         (when (= period :tail)
           (at/at (+ *pool-delta* (at/now))
                  #(recuring-schedule scheduler counter period entity id) spool)))

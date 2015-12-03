@@ -16,7 +16,7 @@
     "Check if expired.")
   (get-active-schedules [scheduler]
     "Return all active schedules from the store.")
-  (execute [scheduler entity]
+  (execute [scheduler scid entity]
     "How to execute `entity`."))
 
 ; In-Memory ScheduleStore implementation. {{{1
@@ -34,5 +34,5 @@
     (nil? (get-schedule this scid)))
   (get-active-schedules [this]
     (vals @store))
-  (execute [this entity]
+  (execute [this _ entity]
     (entity)))
